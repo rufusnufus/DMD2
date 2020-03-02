@@ -26,3 +26,7 @@ Running the psql console
 ```console
 $ psql -U postgres
 ```
+Shut down the server
+```console
+$ pg_ctl -D /usr/local/var/postgres stop
+```
