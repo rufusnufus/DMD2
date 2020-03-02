@@ -11,3 +11,10 @@ $ psql -U postgres -d dvdrental -f restore.sql
     * date in postgres was changed to date in mongodb(using datetime.datetime f-n)
     * numeric in postgres was changed to double in mongodb(using conversion float())
     * bytea in postgres was changed to binary data in mongodb(using the method tobytes())
+
+P.S. for running mongodb server:
+```console
+$ sudo mongod
+```
+in another terminal window run ```$ mongo``` for openning mongo console
+```show dbs``` for showing all dbs in mongo
