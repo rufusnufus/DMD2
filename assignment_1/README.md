@@ -16,5 +16,13 @@ P.S. for running mongodb server:
 ```console
 $ sudo mongod
 ```
-in another terminal window run ```$ mongo``` for openning mongo console
+In another terminal window run ```$ mongo``` for openning mongo console
 ```show dbs``` for showing all dbs in mongo
+P.P.S for running psql server:
+```console
+$ pg_ctl -D /usr/local/var/postgres start
+```
+Running the psql console
+```console
+$ psql -U postgres
+```
