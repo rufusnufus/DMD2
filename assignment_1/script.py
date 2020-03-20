@@ -142,9 +142,18 @@ for row in rows:
 cur.execute("SELECT * FROM film_category;")
 rows = cur.fetchall()
 col = db['film_category']
+fids_cursor = db['film'].find({}, {'_id':0, 'film_id':1})
+films_ids = set()
+for fid in fids_cursor:
+	films_ids.add(fid['film_id']) 
+film_categories = {key: [] for key in films_ids}
+film_updates = {key: [] for key in films_ids}
 for row in rows:
-	name = db['category'].find_one({'category_id':row[1]}, {'_id':0, 'name':1})
-	col.insert_one({"film_id": row[0], "category_id": row[1], "name": name['name'], "last_update": row[2]})
+	name = db['category'].find_one({'category_id':row[1]}, {'_id':0, 'name':1, 'last_update':1})
+	film_categories[row[0]].append({'category': name['name'], 'last_update': name['last_update']})
+	film_updates[row[0]] = row[2]
+for fid in film_categories:
+	col.insert_one({'film_id': fid, 'categories': film_categories[fid], 'last_update': film_updates[fid]})
 
 # --           END          -- #
 
@@ -154,9 +163,9 @@ cur.execute("SELECT * FROM inventory;")
 rows = cur.fetchall()
 col = db['inventory']
 for row in rows:
-	film_cat_name = db['film_category'].find_one({'film_id': row[1]},{'_id':0, 'name':1})
+	film_cat_name = db['film_category'].find_one({'film_id': row[1]},{'_id':0, 'categories':1})
 	col.insert_one({"inventory_id": row[0], "film_id": row[1], "store_id": row[2], 
-					"last_update": row[3], "category": film_cat_name['name']})
+					"last_update": row[3], "category": film_cat_name['categories'][0]['category']})
 
 # --           END          -- #
 
@@ -224,6 +233,8 @@ for row in rows:
 					"last_update": row[3]})
 
 # --           END          -- #
+
+db['category'].drop()
 
 #close connections to dbs
 con_mongo.close()
