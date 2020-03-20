@@ -1,5 +1,5 @@
 TASK: move the database of your company from an RDBMS to MongoDB
-\
+
 1. Firstly I retrieved restore.sql from postgree directory file to my new created database `dvdrental`:
 ```console
 $ psql -U postgres
