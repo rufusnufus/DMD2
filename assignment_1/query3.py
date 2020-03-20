@@ -17,7 +17,10 @@ for film_category in db['film_category'].find():
 	for inventory_record in inventory_records:
 		rentals_of_inventory = db['rental'].count_documents({'inventory_id':inventory_record['inventory_id']})
 		amount_of_rentals += rentals_of_inventory
-	d[film_category['film_id']] = [film['title'],category_of_film['name'], amount_of_rentals]
+	if film_category['film_id'] in d:
+		d[film_category['film_id']][1].append(category_of_film['name'])
+	else:
+		d[film_category['film_id']] = [film['title'],[category_of_film['name']], amount_of_rentals]
 
 
 with open('query3.csv', 'w', newline='') as f:
