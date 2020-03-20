@@ -3,6 +3,9 @@ from dijkstar.algorithm import NoPathError
 from query2 import calculate_matches, set_actors_and_film_actors
 from pymongo import MongoClient
 import csv
+import time
+
+start_time = time.time()
 
 #connecting to mongodb
 con = MongoClient("mongodb://localhost")
@@ -20,7 +23,7 @@ for i in actors:
 			graph.add_edge(j, i, 1)
 
 
-print("Input the name and surname of the actor(e.q. Ivan Ivanov):", end = ' ')
+print("Input the name and surname of the actor(e.q. Penelope Guiness):", end = ' ')
 actor = input()
 actor_name, actor_surname = actor.split()
 try:
@@ -48,3 +51,6 @@ except:
 	print('We hope that this actor will become famous soon and will be added into DB.')
 
 con.close()
+print(f'Now you can see results for {actor} in query5.csv file.')
+
+print(f'--- {(time.time() - start_time)} seconds ---')

@@ -1,5 +1,8 @@
 from pymongo import MongoClient
 import csv
+import time
+
+start_time = time.time()
 
 #connecting to mongodb
 con = MongoClient("mongodb://localhost")
@@ -34,3 +37,6 @@ with open('query3.csv', 'w', newline='') as f:
 		writer.writerow(dic)
 
 con.close()
+print(f'Now you can see the results in query3.csv file.')
+
+print(f'--- {(time.time() - start_time)} seconds ---')

@@ -1,5 +1,8 @@
 from pymongo import MongoClient
 import csv
+import time
+
+start_time = time.time()
 
 def set_actors_and_film_actors(db):
 	film_actors = {}
@@ -57,3 +60,6 @@ if __name__ == "__main__":
 			writer.writerow(d)
 
 	con.close()
+
+	print(f'Now you can see the results in query2.csv file.')
+	print(f'--- {(time.time() - start_time)} seconds ---')

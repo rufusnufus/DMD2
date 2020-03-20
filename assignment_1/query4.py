@@ -11,13 +11,13 @@ con = MongoClient('mongodb://localhost')
 db = con['dvdrental']
 
 
-print('Input the name and surname of the customer(e.q. Ivan Ivanov):', end = ' ')
+print('Input the name and surname of the customer(e.g. Ruth Martinez):', end = ' ')
 person = input()
-print('How many films you want to see?', end = ' ')
+print('How many films you want to see?(e.g. 10)', end = ' ')
 need = int(input())
 customer_first_name, customer_last_name = person.split()
 print('Wait a little bit:) Our system analyzes customer\'s preferences to give you the best result!')
-print('You have time to drink a tea with some coockie)')
+print('You have time to drink a tea with some coockies)')
 customer_id = db['customer'].find_one({'first_name': customer_first_name, 
 							'last_name': customer_last_name})['customer_id']
 
