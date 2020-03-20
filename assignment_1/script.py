@@ -143,7 +143,8 @@ cur.execute("SELECT * FROM film_category;")
 rows = cur.fetchall()
 col = db['film_category']
 for row in rows:
-	col.insert_one({"film_id": row[0], "category_id": row[1], "last_update": row[2]})
+	name = db['category'].find_one({'category_id':row[1]}, {'_id':0, 'name':1})
+	col.insert_one({"film_id": row[0], "category_id": row[1], "name": name['name'], "last_update": row[2]})
 
 # --           END          -- #
 
@@ -153,8 +154,9 @@ cur.execute("SELECT * FROM inventory;")
 rows = cur.fetchall()
 col = db['inventory']
 for row in rows:
+	film_cat_name = db['film_category'].find_one({'film_id': row[1]},{'_id':0, 'name':1})
 	col.insert_one({"inventory_id": row[0], "film_id": row[1], "store_id": row[2], 
-					"last_update": row[3]})
+					"last_update": row[3], "category": film_cat_name['name']})
 
 # --           END          -- #
 
