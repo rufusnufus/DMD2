@@ -1,17 +1,23 @@
 from pymongo import MongoClient
 import csv
+import time
+
+start_time = time.time()
 
 #connecting to mongodb
-con = MongoClient("mongodb://localhost")
+con = MongoClient('mongodb://localhost')
 
 #connecting to database named dvdrental in mongo
 db = con['dvdrental']
 
-print("Input the name and surname of the customer(e.q. Ivan Ivanov):", end = ' ')
+
+print('Input the name and surname of the customer(e.q. Ivan Ivanov):', end = ' ')
 person = input()
+print('How many films you want to see?', end = ' ')
+need = int(input())
 customer_first_name, customer_last_name = person.split()
-print("Wait a little bit:) Our system analyzes customer's preferences to give you the best result!")
-print("You have time to drink a tea with some coockie)")
+print('Wait a little bit:) Our system analyzes customer\'s preferences to give you the best result!')
+print('You have time to drink a tea with some coockie)')
 customer_id = db['customer'].find_one({'first_name': customer_first_name, 
 							'last_name': customer_last_name})['customer_id']
 
@@ -50,24 +56,36 @@ for f in cust_ids:
 		if film_matches[f] > max_matches:
 			max_matches = film_matches[f]
 
-appropriate_match = max_matches//1.5
+appropriate_match = max_matches
 recommendations = []
 
-for f in cust_ids:
-	if film_matches[f] >= appropriate_match:
-		recommendations.extend(film_recommendations[f])
+while(appropriate_match > 0 and len(recommendations) < need):
+	for f in cust_ids:
+		if film_matches[f] >= appropriate_match and f != customer_id:
+			for film in film_recommendations[f]:
+				if len(recommendations) >= need:
+					break
+				if film in recommendations:
+					break
+				film[-1] = int(appropriate_match/max_matches*100)
+				recommendations.append(film)
+				
+	appropriate_match //= 1.5
 
-with open('query4.csv', 'w', newline='') as f:
-	fieldnames = ['name', 'category']
+
+with open(f'{person}.csv', 'w', newline='') as f:
+	fieldnames = ['film', 'metric']
 
 	writer = csv.DictWriter(f, fieldnames=fieldnames)
 	writer.writeheader()
 
 	for film in recommendations:
 		dic = {}
-		dic['name'] = db['film'].find_one({'film_id': film[0]})['title']
-		dic['category'] = film[-1]
+		dic['film'] = db['film'].find_one({'film_id': film[0]})['title']
+		dic['metric'] = f'{film[-1]}%'
 		writer.writerow(dic)
-print('Now you can see the list of film recommendations of the customer in query4.csv file.')
+print(f'Now you can see the list of film recommendations of the customer in {person}.csv file.')
 print('Have a good time!')
 con.close()
+
+print(f'--- {(time.time() - start_time)} seconds ---')
