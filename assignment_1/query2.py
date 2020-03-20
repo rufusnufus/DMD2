@@ -30,7 +30,7 @@ for f in film_actors.keys():
 
 
 with open('query2.csv', 'w', newline='') as f:
-	fieldnames = ['_']
+	fieldnames = ['name']
 	for actor_id in actors:
 		actor = db['actor'].find_one({'actor_id': actor_id})
 		fieldnames.append(actor['first_name']+' '+actor['last_name'])
@@ -40,7 +40,7 @@ with open('query2.csv', 'w', newline='') as f:
 
 	for i in actors_to_actors.keys():
 		actor = db['actor'].find_one({'actor_id': i})
-		d = {'_': actor['first_name']+' '+actor['last_name']}
+		d = {'name': actor['first_name']+' '+actor['last_name']}
 		for actor_id in actors:
 			coactor = db['actor'].find_one({'actor_id': actor_id})
 			d[coactor['first_name']+' '+coactor['last_name']] = actors_to_actors[i][actor_id]
