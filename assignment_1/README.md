@@ -1,4 +1,4 @@
-TASK: move the database of your company from an RDBMS to MongoDB
+TASK: move the database of your company from an RDBMS to MongoDB\
 
 1. Firstly I retrieved restore.sql from postgree directory file to my new created database `dvdrental`:
 ```console
@@ -11,14 +11,15 @@ $ psql -U postgres -d dvdrental -f restore.sql
     * date in postgres was changed to date in mongodb(using datetime.datetime f-n)
     * numeric in postgres was changed to double in mongodb(using conversion float())
     * bytea in postgres was changed to binary data in mongodb(using the method tobytes())
-
+  
+\
 P.S. for running mongodb server:
 ```console
 $ sudo mongod
 ```
-In another terminal window run ```$ mongo``` for openning mongo console
-```show dbs``` for showing all dbs in mongo
-P.P.S for running psql server:
+In another terminal window run ```$ mongo``` for openning mongo console\
+```show dbs``` for showing all dbs in mongo\
+P.P.S for running psql server:\
 ```console
 $ pg_ctl -D /usr/local/var/postgres start
 ```
