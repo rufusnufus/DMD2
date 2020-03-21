@@ -34,21 +34,23 @@ for i in actors:
 
 actor_name, actor_surname = actor.split()
 try:
-	actor_id = db['actor'].find_one({'first_name': actor_name, 'last_name': actor_surname}, {'_id':0, 'actor_id':1})['actor_id']
+	actor_id = db['actor'].find_one({'first_name': actor_name, 'last_name': actor_surname})['actor_id']
 
 	with open('query5.csv', 'w', newline='') as f:
-		fieldnames = ['first name', 'last name', 'Bacon number']
+		fieldnames = ['actor id', 'first name', 'last name', 'Bacon number']
 
 		writer = csv.DictWriter(f, fieldnames=fieldnames)
 		writer.writeheader()
 
-		for alt_actor in actors:
+		for alt_actor_id in actors:
 			dic = {}
-			dic['first name'], dic['last name'] = alt_actor.split()
-			
+			dic['actor id'] = alt_actor_id
+			dic['first name'] = db['actor'].find_one({'actor_id': alt_actor_id})['first_name']
+			dic['last name'] = db['actor'].find_one({'actor_id': alt_actor_id})['last_name']
+
 			#calculate the shortest path to another actor which is exactly Bacon number
 			try:
-				bacon_num = find_path(graph, actor, alt_actor).total_cost
+				bacon_num = find_path(graph, actor_id, alt_actor_id).total_cost
 			#if there is no such path, then Bacon number is None
 			except NoPathError:
 				bacon_num = None

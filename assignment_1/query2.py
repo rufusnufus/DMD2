@@ -2,19 +2,17 @@ from pymongo import MongoClient
 import csv
 import time
 
-#finds all actors(name+surname) and assigns them to set actors 
+#finds all actors(id) and assigns them to set actors 
 #maps each film_id and actors played in it, returns as film_actors
 def set_actors_and_film_actors(db):
 	film_actors = {}
 	actors = set()
-	for film in db['film_actor'].find({},{'_id':0, 'actor_id':1, 'film_id':1}):
-		actor = db['actor'].find_one({'actor_id': film['actor_id']}, {'_id':0, 'first_name':1, 'last_name':1})
-		actor = actor['first_name']+ ' ' + actor['last_name']
-		actors.add(actor)
+	for film in db['film_actor'].find():
+		actors.add(film['actor_id'])
 		if film['film_id'] not in film_actors:
-			film_actors[film['film_id']] = [actor]
+			film_actors[film['film_id']] = [film['actor_id']]
 		else:
-			film_actors[film['film_id']].append(actor)
+			film_actors[film['film_id']].append(film['actor_id'])
 
 	return actors, film_actors
 
@@ -26,6 +24,7 @@ def calculate_matches(actors, film_actors):
 	for i in actors:
 		actors_to_actors[i] = dict(zip(actors, [0].copy()*len(actors)))
 
+
 	for f in film_actors.keys():
 		for i in range(0, len(film_actors[f])):
 			for j in range(i+1, len(film_actors[f])):
@@ -33,7 +32,6 @@ def calculate_matches(actors, film_actors):
 				actors_to_actors[film_actors[f][j]][film_actors[f][i]] += 1
 
 	return actors_to_actors
-
 
 if __name__ == "__main__":
 
@@ -51,16 +49,19 @@ if __name__ == "__main__":
 	#writes actors_to_actors table to query2.csv file
 	with open('query2.csv', 'w', newline='') as f:
 		fieldnames = ['name']
-		for actor in actors:
-			fieldnames.append(actor)
+		for actor_id in actors:
+			actor = db['actor'].find_one({'actor_id': actor_id})
+			fieldnames.append(actor['first_name']+' '+actor['last_name'])
 
 		writer = csv.DictWriter(f, fieldnames=fieldnames)
 		writer.writeheader()
 
-		for actor in actors_to_actors.keys():
-			d = {'name': actor}
-			for coactor in actors:
-				d[coactor] = actors_to_actors[actor][coactor]
+		for i in actors_to_actors.keys():
+			actor = db['actor'].find_one({'actor_id': i})
+			d = {'name': actor['first_name']+' '+actor['last_name']}
+			for actor_id in actors:
+				coactor = db['actor'].find_one({'actor_id': actor_id})
+				d[coactor['first_name']+' '+coactor['last_name']] = actors_to_actors[i][actor_id]
 			writer.writerow(d)
 
 	#closes connection to mongodb
