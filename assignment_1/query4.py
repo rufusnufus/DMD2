@@ -1,6 +1,12 @@
 from pymongo import MongoClient
 import csv
 import time
+import heapq
+
+print('Input name and surname of the customer(e.g. Ruth Martinez):', end = ' ')
+person = input()
+print('How many films you want to see?(e.g. 10)', end = ' ')
+need = int(input())
 
 start_time = time.time()
 
@@ -10,16 +16,11 @@ con = MongoClient('mongodb://localhost')
 #connecting to database named dvdrental in mongo
 db = con['dvdrental']
 
-
-print('Input the name and surname of the customer(e.g. Ruth Martinez):', end = ' ')
-person = input()
-print('How many films you want to see?(e.g. 10)', end = ' ')
-need = int(input())
 customer_first_name, customer_last_name = person.split()
 print('Wait a little bit:) Our system analyzes customer\'s preferences to give you the best result!')
 print('You have time to drink a tea with some coockies)')
 customer_id = db['customer'].find_one({'first_name': customer_first_name, 
-							'last_name': customer_last_name})['customer_id']
+							'last_name': customer_last_name},{'_id':0, 'customer_id':1})['customer_id']
 
 customers_id = db['customer'].find({},{'_id':0, 'customer_id':1})
 
@@ -43,8 +44,6 @@ film_matches = dict(zip(cust_ids, [0].copy()*len(cust_ids)))
 film_recommendations = {}
 max_matches = 0
 for f in cust_ids:
-	if f == customer_id:
-		continue
 	for film in customers_films[f]:
 		if film in customers_films[customer_id]:
 			film_matches[f] += 1
@@ -53,25 +52,14 @@ for f in cust_ids:
 			film_recommendations[f].append(film)
 		elif film[-1] in customer_categories:
 			film_recommendations[f]=[film]
-		if film_matches[f] > max_matches:
-			max_matches = film_matches[f]
 
 appropriate_match = max_matches
 recommendations = []
 
-while(appropriate_match > 0 and len(recommendations) < need):
-	for f in cust_ids:
-		if film_matches[f] >= appropriate_match and f != customer_id:
-			for film in film_recommendations[f]:
-				if len(recommendations) >= need:
-					break
-				if film in recommendations:
-					break
-				film[-1] = int(appropriate_match/max_matches*100)
-				recommendations.append(film)
-				
-	appropriate_match //= 1.5
-
+for f in cust_ids:
+	if f != customer_id:
+		for film in film_recommendations[f]:
+			heapq.heappush(recommendations, (-int(film_matches[f]/film_matches[customer_id]*100), film[0]))
 
 with open(f'{person}.csv', 'w', newline='') as f:
 	fieldnames = ['film', 'metric']
@@ -79,10 +67,11 @@ with open(f'{person}.csv', 'w', newline='') as f:
 	writer = csv.DictWriter(f, fieldnames=fieldnames)
 	writer.writeheader()
 
-	for film in recommendations:
+	for i in range(0, need):
 		dic = {}
-		dic['film'] = db['film'].find_one({'film_id': film[0]})['title']
-		dic['metric'] = f'{film[-1]}%'
+		film = heapq.heappop(recommendations)
+		dic['film'] = db['film'].find_one({'film_id': film[1]},{'_id':0, 'title':1})['title']
+		dic['metric'] = f'{-film[0]}%'
 		writer.writerow(dic)
 print(f'Now you can see the list of film recommendations of the customer in {person}.csv file.')
 print('Have a good time!')

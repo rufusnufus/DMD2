@@ -5,6 +5,9 @@ from pymongo import MongoClient
 import csv
 import time
 
+print("Input the name and surname of the actor(e.g. Penelope Guiness):", end = ' ')
+actor = input()
+
 start_time = time.time()
 
 #connecting to mongodb
@@ -22,26 +25,22 @@ for i in actors:
 			graph.add_edge(i, j, 1)
 			graph.add_edge(j, i, 1)
 
-
-print("Input the name and surname of the actor(e.q. Penelope Guiness):", end = ' ')
-actor = input()
 actor_name, actor_surname = actor.split()
 try:
-	actor_id = db['actor'].find_one({'first_name': actor_name, 'last_name': actor_surname})['actor_id']
+	actor_id = db['actor'].find_one({'first_name': actor_name, 'last_name': actor_surname}, {'_id':0, 'actor_id':1})['actor_id']
 
 	with open('query5.csv', 'w', newline='') as f:
-		fieldnames = ['actor id', 'first name', 'last name', 'Bacon number']
+		fieldnames = ['first name', 'last name', 'Bacon number']
 
 		writer = csv.DictWriter(f, fieldnames=fieldnames)
 		writer.writeheader()
 
-		for alt_actor_id in actors:
+		for alt_actor in actors:
 			dic = {}
-			dic['actor id'] = alt_actor_id
-			dic['first name'] = db['actor'].find_one({'actor_id': alt_actor_id})['first_name']
-			dic['last name'] = db['actor'].find_one({'actor_id': alt_actor_id})['last_name']
+			dic['first name'] = alt_actor['first_name']
+			dic['last name'] = alt_actor['last_name']
 			try:
-				bacon_num = find_path(graph, actor_id, alt_actor_id).total_cost
+				bacon_num = find_path(graph, actor, alt_actor).total_cost
 			except NoPathError:
 				bacon_num = None
 			dic['Bacon number'] = bacon_num

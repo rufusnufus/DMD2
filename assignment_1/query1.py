@@ -16,11 +16,11 @@ def find_recent_year(collection):
 
 recent_year = find_recent_year(db['rental'])
 population = {}
-for entry in db['rental'].find():
+for entry in db['rental'].find({}, {'_id':0, 'customer_id':1, 'rental_date':1, 'inventory_id':1}):
 	if entry['rental_date'].year == recent_year:
 		if entry['customer_id'] not in population:
 			population[entry['customer_id']] = set()
-		film_id = [i['film_id'] for i in db['inventory'].find({'inventory_id': entry['inventory_id']})]
+		film_id = [i['film_id'] for i in db['inventory'].find({'inventory_id': entry['inventory_id']}, {'_id':0, 'film_id':1})]
 		for film in db['film_category'].find({'film_id': film_id[0]},{'_id':0, 'categories':1}):
 			population[entry['customer_id']].add(film['categories'][0]['category'])
 

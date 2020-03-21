@@ -12,9 +12,9 @@ db = con['dvdrental']
 
 
 d = {}
-for film_category in db['film_category'].find():
-	film = db['film'].find_one({'film_id': film_category['film_id']})
-	inventory_records = db['inventory'].find({'film_id': film_category['film_id']})
+for film_category in db['film_category'].find({}, {'_id':0, 'film_id':1, 'categories':1}):
+	film = db['film'].find_one({'film_id': film_category['film_id']}, {'_id':0, 'title':1})
+	inventory_records = db['inventory'].find({'film_id': film_category['film_id']}, {'_id':0, 'inventory_id':1})
 	amount_of_rentals = 0
 	for inventory_record in inventory_records:
 		rentals_of_inventory = db['rental'].count_documents({'inventory_id':inventory_record['inventory_id']})

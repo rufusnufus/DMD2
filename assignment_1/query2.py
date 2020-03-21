@@ -2,17 +2,17 @@ from pymongo import MongoClient
 import csv
 import time
 
-start_time = time.time()
-
 def set_actors_and_film_actors(db):
 	film_actors = {}
 	actors = set()
-	for film in db['film_actor'].find():
-		actors.add(film['actor_id'])
+	for film in db['film_actor'].find({},{'_id':0, 'actor_id':1, 'film_id':1}):
+		actor = db['actor'].find_one({'actor_id': film['actor_id']}, {'_id':0, 'first_name':1, 'last_name':1})
+		actor = actor['first_name']+ ' ' + actor['last_name']
+		actors.add(actor)
 		if film['film_id'] not in film_actors:
-			film_actors[film['film_id']] = [film['actor_id']]
+			film_actors[film['film_id']] = [actor]
 		else:
-			film_actors[film['film_id']].append(film['actor_id'])
+			film_actors[film['film_id']].append(actor)
 
 	return actors, film_actors
 
@@ -31,7 +31,10 @@ def calculate_matches(actors, film_actors):
 
 	return actors_to_actors
 
+
 if __name__ == "__main__":
+
+	start_time = time.time()
 
 	#connecting to mongodb
 	con = MongoClient("mongodb://localhost")
@@ -44,19 +47,16 @@ if __name__ == "__main__":
 
 	with open('query2.csv', 'w', newline='') as f:
 		fieldnames = ['name']
-		for actor_id in actors:
-			actor = db['actor'].find_one({'actor_id': actor_id})
-			fieldnames.append(actor['first_name']+' '+actor['last_name'])
+		for actor in actors:
+			fieldnames.append(actor)
 
 		writer = csv.DictWriter(f, fieldnames=fieldnames)
 		writer.writeheader()
 
-		for i in actors_to_actors.keys():
-			actor = db['actor'].find_one({'actor_id': i})
-			d = {'name': actor['first_name']+' '+actor['last_name']}
-			for actor_id in actors:
-				coactor = db['actor'].find_one({'actor_id': actor_id})
-				d[coactor['first_name']+' '+coactor['last_name']] = actors_to_actors[i][actor_id]
+		for actor in actors_to_actors.keys():
+			d = {'name': actor}
+			for coactor in actors:
+				d[coactor] = actors_to_actors[actor][coactor]
 			writer.writerow(d)
 
 	con.close()
