@@ -44,8 +44,8 @@ try:
 
 		for alt_actor in actors:
 			dic = {}
-			dic['first name'] = alt_actor['first_name']
-			dic['last name'] = alt_actor['last_name']
+			dic['first name'], dic['last name'] = alt_actor.split()
+			
 			#calculate the shortest path to another actor which is exactly Bacon number
 			try:
 				bacon_num = find_path(graph, actor, alt_actor).total_cost
