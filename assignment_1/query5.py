@@ -16,8 +16,15 @@ con = MongoClient("mongodb://localhost")
 #connecting to database named dvdrental in mongo
 db = con['dvdrental']
 
+#transfer the set of actors and film_actors from 2nd query
 actors, film_actors = set_actors_and_film_actors(db)
+
+#calculate via above parameters actors to actors costarring times
 actors_to_actors = calculate_matches(actors, film_actors)
+
+#construct the graph from actors_to_actors dict
+#if actors played at least one time they know each other, so 
+#edge between them equals to 1
 graph = Graph()
 for i in actors:
 	for j in actors:
@@ -39,8 +46,10 @@ try:
 			dic = {}
 			dic['first name'] = alt_actor['first_name']
 			dic['last name'] = alt_actor['last_name']
+			#calculate the shortest path to another actor which is exactly Bacon number
 			try:
 				bacon_num = find_path(graph, actor, alt_actor).total_cost
+			#if there is no such path, then Bacon number is None
 			except NoPathError:
 				bacon_num = None
 			dic['Bacon number'] = bacon_num

@@ -2,6 +2,8 @@ from pymongo import MongoClient
 import csv
 import time
 
+#finds all actors(name+surname) and assigns them to set actors 
+#maps each film_id and actors played in it, returns as film_actors
 def set_actors_and_film_actors(db):
 	film_actors = {}
 	actors = set()
@@ -16,12 +18,13 @@ def set_actors_and_film_actors(db):
 
 	return actors, film_actors
 
-
+#calculates amount of costarring of each actor with all other actors using film_actors dictionary
+#actors_to_actors - dict, where key is actor's id and value is another dict with all actors'id as keys 
+#and amount of co-starred movies 
 def calculate_matches(actors, film_actors):
 	actors_to_actors = {}
 	for i in actors:
 		actors_to_actors[i] = dict(zip(actors, [0].copy()*len(actors)))
-
 
 	for f in film_actors.keys():
 		for i in range(0, len(film_actors[f])):
@@ -45,6 +48,7 @@ if __name__ == "__main__":
 	actors, film_actors = set_actors_and_film_actors(db)
 	actors_to_actors = calculate_matches(actors, film_actors)
 
+	#writes actors_to_actors table to query2.csv file
 	with open('query2.csv', 'w', newline='') as f:
 		fieldnames = ['name']
 		for actor in actors:
@@ -59,6 +63,7 @@ if __name__ == "__main__":
 				d[coactor] = actors_to_actors[actor][coactor]
 			writer.writerow(d)
 
+	#closes connection to mongodb
 	con.close()
 
 	print(f'Now you can see the results in query2.csv file.')
